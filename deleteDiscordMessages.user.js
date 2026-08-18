@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Undiscord
 // @description     Delete all messages in a Discord channel or DM (Bulk deletion)
-// @version         5.2.7
+// @version         5.2.7.2
 // @author          victornpb
 // @homepageURL     https://github.com/victornpb/undiscord
 // @supportURL      https://github.com/victornpb/undiscord/discussions
@@ -11,399 +11,399 @@
 // @license         MIT
 // @namespace       https://github.com/victornpb/deleteDiscordMessages
 // @icon            https://victornpb.github.io/undiscord/images/icon128.png
-// @downloadURL     https://raw.githubusercontent.com/victornpb/undiscord/master/deleteDiscordMessages.user.js
 // @contributionURL https://www.buymeacoffee.com/vitim
 // @grant           none
 // @attribution     Original project (https://github.com/victornpb/undiscord)
 // ==/UserScript==
+
 (function () {
-	'use strict';
+    'use strict';
 
-	/* rollup-plugin-baked-env */
-	const VERSION = "5.2.6";
+    /* rollup-plugin-baked-env */
+    const VERSION = "5.2.7.2";
 
-	var themeCss = (`
-/* undiscord window */
-#undiscord.browser { box-shadow: var(--shadow-border), var(--shadow-high); border: 1px solid var(--border-subtle); overflow: hidden; }
-#undiscord.container,
-#undiscord .container { background-color: var(--background-surface-high); border-radius: 8px; box-sizing: border-box; cursor: default; flex-direction: column; }
-#undiscord .header { background-color: var(--background-tertiary); height: 48px; align-items: center; min-height: 48px; padding: 0 16px; display: flex; color: var(--header-secondary); cursor: grab; }
-#undiscord .header .icon { color: var(--interactive-normal); margin-right: 8px; flex-shrink: 0; width: 24; height: 24; }
-#undiscord .header .icon:hover { color: var(--interactive-hover); }
-#undiscord .header h3 { font-size: 16px; line-height: 20px; font-weight: 500; font-family: var(--font-display); color: var(--header-primary); flex-shrink: 0; margin-right: 16px; }
-#undiscord .spacer { flex-grow: 1; }
-#undiscord .header .vert-divider { width: 1px; height: 24px; background-color: var(--background-modifier-accent); margin-right: 16px; flex-shrink: 0; }
-#undiscord legend,
-#undiscord label { color: var(--header-secondary); font-size: 12px; line-height: 16px; font-weight: 500; text-transform: uppercase; cursor: default; font-family: var(--font-display); margin-bottom: 8px; }
-#undiscord .multiInput { display: flex; align-items: center; font-size: 16px; box-sizing: border-box; width: 100%; border-radius: 3px; color: var(--text-default); background-color: var(--input-background); border: none; transition: border-color 0.2s ease-in-out 0s; }
-#undiscord .multiInput :first-child { flex-grow: 1; }
-#undiscord .multiInput button:last-child { margin-right: 4px; }
-#undiscord .input { font-size: 16px; width: 100%; transition: border-color 0.2s ease-in-out 0s; padding: 10px; height: 44px; background-color: var(--input-background); border: 1px solid var(--input-border); border-radius: 8px; box-sizing: border-box; color: var(--text-default); }
-#undiscord fieldset { margin-top: 16px; }
-#undiscord .input-wrapper { display: flex; align-items: center; font-size: 16px; box-sizing: border-box; width: 100%; border-radius: 3px; color: var(--text-default); background-color: var(--input-background); border: none; transition: border-color 0.2s ease-in-out 0s; }
-#undiscord input[type="text"],
-#undiscord input[type="search"],
-#undiscord input[type="password"],
-#undiscord input[type="datetime-local"],
-#undiscord input[type="number"],
-#undiscord input[type="range"] { background-color: var(--input-background); border: 1px solid var(--input-border); border-radius: 8px; box-sizing: border-box; color: var(--text-default); font-size: 16px; height: 44px; padding: 12px 10px; transition: border-color .2s ease-in-out; width: 100%; }
-#undiscord .divider,
-#undiscord hr { border: none; margin-bottom: 24px; padding-bottom: 4px; border-bottom: 1px solid var(--background-modifier-accent); }
-#undiscord .sectionDescription { margin-bottom: 16px; color: var(--header-secondary); font-size: 14px; line-height: 20px; font-weight: 400; }
-#undiscord a { color: var(--text-link); text-decoration: none; }
-#undiscord .btn,
-#undiscord button { position: relative; display: flex; -webkit-box-pack: center; justify-content: center; -webkit-box-align: center; align-items: center; box-sizing: border-box; background: none; border: none; border-radius: 3px; font-size: 14px; font-weight: 500; line-height: 16px; padding: 2px 16px; user-select: none; /* sizeSmall */     width: 60px; height: 32px; min-width: 60px; min-height: 32px; /* lookFilled colorPrimary */     color: rgb(255, 255, 255); background-color: var(--button-secondary-background); }
-#undiscord .sizeMedium { width: 96px; height: 38px; min-width: 96px; min-height: 38px; }
-#undiscord .sizeMedium.icon { width: 38px; min-width: 38px; }
-#undiscord sup { vertical-align: top; }
-/* lookFilled colorPrimary */
-#undiscord .accent { background-color: var(--brand-experiment); }
-#undiscord .danger { background-color: var(--button-danger-background); }
-#undiscord .positive { background-color: var(--button-positive-background); }
-#undiscord .info { font-size: 12px; line-height: 16px; padding: 8px 10px; color: var(--text-muted); }
-/* Scrollbar */
-#undiscord .scroll::-webkit-scrollbar { width: 8px; height: 8px; }
-#undiscord .scroll::-webkit-scrollbar-corner { background-color: transparent; }
-#undiscord .scroll::-webkit-scrollbar-thumb { background-clip: padding-box; border: 2px solid transparent; border-radius: 4px; background-color: var(--scrollbar-thin-thumb); min-height: 40px; }
-#undiscord .scroll::-webkit-scrollbar-track { border-color: var(--scrollbar-thin-track); background-color: var(--scrollbar-thin-track); border: 2px solid var(--scrollbar-thin-track); }
-/* fade scrollbar */
-#undiscord .scroll::-webkit-scrollbar-thumb,
-#undiscord .scroll::-webkit-scrollbar-track { visibility: hidden; }
-#undiscord .scroll:hover::-webkit-scrollbar-thumb,
-#undiscord .scroll:hover::-webkit-scrollbar-track { visibility: visible; }
-/**** functional classes ****/
-#undiscord.redact .priv { display: none !important; }
-#undiscord.redact x:not(:active) { color: transparent !important; background-color: var(--primary-700) !important; cursor: default; user-select: none; }
-#undiscord.redact x:hover { position: relative; }
-#undiscord.redact x:hover::after { content: "Redacted information (Streamer mode: ON)"; position: absolute; display: inline-block; top: -32px; left: -20px; padding: 4px; width: 150px; font-size: 8pt; text-align: center; white-space: pre-wrap; background-color: var(--background-floating); -webkit-box-shadow: var(--elevation-high); box-shadow: var(--elevation-high); color: var(--text-default); border-radius: 5px; pointer-events: none; }
-#undiscord.redact [priv] { -webkit-text-security: disc !important; }
-#undiscord :disabled { display: none; }
-/**** layout and utility classes ****/
-#undiscord,
-#undiscord * { box-sizing: border-box; }
-#undiscord .col { display: flex; flex-direction: column; }
-#undiscord .row { display: flex; flex-direction: row; align-items: center; }
-#undiscord .mb1 { margin-bottom: 8px; }
-#undiscord .log { margin-bottom: 0.25em; }
-#undiscord .log-debug { color: inherit; }
-#undiscord .log-info { color: #00b0f4; }
-#undiscord .log-verb { color: #72767d; }
-#undiscord .log-warn { color: #faa61a; }
-#undiscord .log-error { color: #f04747; }
-#undiscord .log-success { color: #43b581; }
-`);
+    var themeCss = (`
+    /* undiscord window */
+    #undiscord.browser { box-shadow: var(--shadow-border), var(--shadow-high); border: 1px solid var(--border-subtle); overflow: hidden; }
+    #undiscord.container,
+    #undiscord .container { background-color: var(--background-surface-high); border-radius: 8px; box-sizing: border-box; cursor: default; flex-direction: column; }
+    #undiscord .header { background-color: var(--background-tertiary); height: 48px; align-items: center; min-height: 48px; padding: 0 16px; display: flex; color: var(--header-secondary); cursor: grab; }
+    #undiscord .header .icon { color: var(--interactive-normal); margin-right: 8px; flex-shrink: 0; width: 24; height: 24; }
+    #undiscord .header .icon:hover { color: var(--interactive-hover); }
+    #undiscord .header h3 { font-size: 16px; line-height: 20px; font-weight: 500; font-family: var(--font-display); color: var(--header-primary); flex-shrink: 0; margin-right: 16px; }
+    #undiscord .spacer { flex-grow: 1; }
+    #undiscord .header .vert-divider { width: 1px; height: 24px; background-color: var(--background-modifier-accent); margin-right: 16px; flex-shrink: 0; }
+    #undiscord legend,
+    #undiscord label { color: var(--header-secondary); font-size: 12px; line-height: 16px; font-weight: 500; text-transform: uppercase; cursor: default; font-family: var(--font-display); margin-bottom: 8px; }
+    #undiscord .multiInput { display: flex; align-items: center; font-size: 16px; box-sizing: border-box; width: 100%; border-radius: 3px; color: var(--text-default); background-color: var(--input-background-default);; border: none; transition: border-color 0.2s ease-in-out 0s; }
+    #undiscord .multiInput :first-child { flex-grow: 1; }
+    #undiscord .multiInput button:last-child { margin-right: 4px; }
+    #undiscord .input { font-size: 16px; width: 100%; transition: border-color 0.2s ease-in-out 0s; padding: 10px; height: 44px; background-color: var(--input-background-default); border: 1px solid var(--input-border-default); border-radius: 8px; box-sizing: border-box; color: var(--text-default); }
+    #undiscord fieldset { margin-top: 16px; }
+    #undiscord .input-wrapper { display: flex; align-items: center; font-size: 16px; box-sizing: border-box; width: 100%; border-radius: 3px; color: var(--text-default); background-color: var(--input-background-default);; border: none; transition: border-color 0.2s ease-in-out 0s; }
+    #undiscord input[type="text"],
+    #undiscord input[type="search"],
+    #undiscord input[type="password"],
+    #undiscord input[type="datetime-local"],
+    #undiscord input[type="number"],
+    #undiscord input[type="range"] { background-color: var(--input-background-default);; border: 1px solid var(--input-border); border-radius: 8px; box-sizing: border-box; color: var(--text-default); font-size: 16px; height: 44px; padding: 12px 10px; transition: border-color .2s ease-in-out; width: 100%; }
+    #undiscord .divider,
+    #undiscord hr { border: none; margin-bottom: 24px; padding-bottom: 4px; border-bottom: 1px solid var(--background-modifier-accent); }
+    #undiscord .sectionDescription { margin-bottom: 16px; color: var(--header-secondary); font-size: 14px; line-height: 20px; font-weight: 400; }
+    #undiscord a { color: var(--text-link); text-decoration: none; }
+    #undiscord .btn,
+    #undiscord button { position: relative; display: flex; -webkit-box-pack: center; justify-content: center; -webkit-box-align: center; align-items: center; box-sizing: border-box; background: none; border: none; border-radius: 3px; font-size: 14px; font-weight: 500; line-height: 16px; padding: 2px 16px; user-select: none; /* sizeSmall */     width: 60px; height: 32px; min-width: 60px; min-height: 32px; /* lookFilled colorPrimary */     color: var(--text-default); background-color: var(--button-secondary-background); }
+    #undiscord .sizeMedium { width: 96px; height: 38px; min-width: 96px; min-height: 38px; }
+    #undiscord .sizeMedium.icon { width: 38px; min-width: 38px; }
+    #undiscord sup { vertical-align: top; }
+    /* lookFilled colorPrimary */
+    #undiscord .accent { background-color: var(--brand-experiment); }
+    #undiscord .danger { background-color: var(--button-danger-background); }
+    #undiscord .positive { background-color: var(--button-positive-background); }
+    #undiscord .info { font-size: 12px; line-height: 16px; padding: 8px 10px; color: var(--text-muted); }
+    /* Scrollbar */
+    #undiscord .scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+    #undiscord .scroll::-webkit-scrollbar-corner { background-color: transparent; }
+    #undiscord .scroll::-webkit-scrollbar-thumb { background-clip: padding-box; border: 2px solid transparent; border-radius: 4px; background-color: var(--scrollbar-thin-thumb); min-height: 40px; }
+    #undiscord .scroll::-webkit-scrollbar-track { border-color: var(--scrollbar-thin-track); background-color: var(--scrollbar-thin-track); border: 2px solid var(--scrollbar-thin-track); }
+    /* fade scrollbar */
+    #undiscord .scroll::-webkit-scrollbar-thumb,
+    #undiscord .scroll::-webkit-scrollbar-track { visibility: hidden; }
+    #undiscord .scroll:hover::-webkit-scrollbar-thumb,
+    #undiscord .scroll:hover::-webkit-scrollbar-track { visibility: visible; }
+    /**** functional classes ****/
+    #undiscord.redact .priv { display: none !important; }
+    #undiscord.redact x:not(:active) { color: transparent !important; background-color: var(--primary-700) !important; cursor: default; user-select: none; }
+    #undiscord.redact x:hover { position: relative; }
+    #undiscord.redact x:hover::after { content: "Redacted information (Streamer mode: ON)"; position: absolute; display: inline-block; top: -32px; left: -20px; padding: 4px; width: 150px; font-size: 8pt; text-align: center; white-space: pre-wrap; background-color: var(--background-floating); -webkit-box-shadow: var(--elevation-high); box-shadow: var(--elevation-high); color: var(--text-default); border-radius: 5px; pointer-events: none; }
+    #undiscord.redact [priv] { -webkit-text-security: disc !important; }
+    #undiscord :disabled { display: none; }
+    /**** layout and utility classes ****/
+    #undiscord,
+    #undiscord * { box-sizing: border-box; }
+    #undiscord .col { display: flex; flex-direction: column; }
+    #undiscord .row { display: flex; flex-direction: row; align-items: center; }
+    #undiscord .mb1 { margin-bottom: 8px; }
+    #undiscord .log { margin-bottom: 0.25em; }
+    #undiscord .log-debug { color: inherit; }
+    #undiscord .log-info { color: #00b0f4; }
+    #undiscord .log-verb { color: #72767d; }
+    #undiscord .log-warn { color: #faa61a; }
+    #undiscord .log-error { color: #f04747; }
+    #undiscord .log-success { color: #43b581; }
+    `);
 
-	var mainCss = (`
-/**** Undiscord Button ****/
-#undicord-btn { position: relative; width: auto; height: 24px; margin: 0 8px; cursor: pointer; color: var(--interactive-normal); flex: 0 0 auto; }
-#undicord-btn progress { position: absolute; top: 23px; left: -4px; width: 32px; height: 12px; display: none; }
-#undicord-btn.running { color: var(--button-danger-background) !important; }
-#undicord-btn.running progress { display: block; }
-/**** Undiscord Interface ****/
-#undiscord { position: fixed; z-index: 100; top: 58px; right: 10px; display: flex; flex-direction: column; width: 800px; height: 80vh; min-width: 610px; max-width: 100vw; min-height: 448px; max-height: 100vh; color: var(--text-normal); border-radius: 4px; background-color: var(--background-secondary); box-shadow: var(--elevation-stroke), var(--elevation-high); will-change: top, left, width, height; }
-#undiscord .header .icon { cursor: pointer; }
-#undiscord .window-body { height: calc(100% - 48px); }
-#undiscord .sidebar { overflow: hidden scroll; overflow-y: auto; width: 270px; min-width: 250px; height: 100%; max-height: 100%; padding: 8px; background: var(--bg-overlay-4, var(--background-base-lowest)); }
-#undiscord .sidebar legend,
-#undiscord .sidebar label { display: block; width: 100%; }
-#undiscord .main { display: flex; max-width: calc(100% - 250px); background-color: var(--bg-overlay-chat, var(--background-base-lower)); flex-grow: 1; }
-#undiscord.hide-sidebar .sidebar { display: none; }
-#undiscord.hide-sidebar .main { max-width: 100%; }
-#undiscord #logArea { font-family: Consolas, Liberation Mono, Menlo, Courier, monospace; font-size: 0.75rem; overflow: auto; padding: 10px; user-select: text; flex-grow: 1; flex-grow: 1; cursor: auto; }
-#undiscord .tbar { padding: 8px; background-color: var(--bg-overlay-2, var(--__header-bar-background)); }
-#undiscord .tbar button { margin-right: 4px; margin-bottom: 4px; }
-#undiscord .footer { cursor: se-resize; padding-right: 30px; }
-#undiscord .footer #progressPercent { padding: 0 1em; font-size: small; color: var(--interactive-muted); flex-grow: 1; }
-.resize-handle { position: absolute; bottom: -15px; right: -15px; width: 30px; height: 30px; transform: rotate(-45deg); background: repeating-linear-gradient(0, var(--background-modifier-accent), var(--background-modifier-accent) 1px, transparent 2px, transparent 4px); cursor: nwse-resize; }
-/**** Elements ****/
-#undiscord summary { font-size: 16px; font-weight: 500; line-height: 20px; position: relative; overflow: hidden; margin-bottom: 2px; padding: 6px 10px; cursor: pointer; white-space: nowrap; text-overflow: ellipsis; color: var(--interactive-normal); border-radius: 4px; flex-shrink: 0; }
-#undiscord fieldset { padding-left: 8px; }
-#undiscord legend a { float: right; text-transform: initial; }
-#undiscord progress { height: 8px; margin-top: 4px; flex-grow: 1; }
-#undiscord .importJson { display: flex; flex-direction: row; }
-#undiscord .importJson button { margin-left: 5px; width: fit-content; }
-`);
+    var mainCss = (`
+    /**** Undiscord Button ****/
+    #undicord-btn { position: relative; width: auto; height: 24px; margin: 0 8px; cursor: pointer; color: var(--interactive-normal); flex: 0 0 auto; }
+    #undicord-btn progress { position: absolute; top: 23px; left: -4px; width: 32px; height: 12px; display: none; }
+    #undicord-btn.running { color: var(--button-danger-background) !important; }
+    #undicord-btn.running progress { display: block; }
+    /**** Undiscord Interface ****/
+    #undiscord { position: fixed; z-index: 100; top: 58px; right: 10px; display: flex; flex-direction: column; width: 800px; height: 80vh; min-width: 610px; max-width: 100vw; min-height: 448px; max-height: 100vh; color: var(--text-default); border-radius: 4px; background-color: var(--background-secondary); box-shadow: var(--elevation-stroke), var(--elevation-high); will-change: top, left, width, height; }
+    #undiscord .header .icon { cursor: pointer; }
+    #undiscord .window-body { height: calc(100% - 48px); }
+    #undiscord .sidebar { overflow: hidden scroll; overflow-y: auto; width: 270px; min-width: 250px; height: 100%; max-height: 100%; padding: 8px; background: var(--bg-overlay-4, var(--background-base-lowest)); }
+    #undiscord .sidebar legend,
+    #undiscord .sidebar label { display: block; width: 100%; }
+    #undiscord .main { display: flex; max-width: calc(100% - 250px); background-color: var(--bg-overlay-chat, var(--background-base-lower)); flex-grow: 1; }
+    #undiscord.hide-sidebar .sidebar { display: none; }
+    #undiscord.hide-sidebar .main { max-width: 100%; }
+    #undiscord #logArea { font-family: Consolas, Liberation Mono, Menlo, Courier, monospace; font-size: 0.75rem; overflow: auto; padding: 10px; user-select: text; flex-grow: 1; flex-grow: 1; cursor: auto; }
+    #undiscord .tbar { padding: 8px; background-color: var(--bg-overlay-2, var(--__header-bar-background)); }
+    #undiscord .tbar button { margin-right: 4px; margin-bottom: 4px; }
+    #undiscord .footer { cursor: se-resize; padding-right: 30px; }
+    #undiscord .footer #progressPercent { padding: 0 1em; font-size: small; color: var(--interactive-muted); flex-grow: 1; }
+    .resize-handle { position: absolute; bottom: -15px; right: -15px; width: 30px; height: 30px; transform: rotate(-45deg); background: repeating-linear-gradient(0, var(--background-modifier-accent), var(--background-modifier-accent) 1px, transparent 2px, transparent 4px); cursor: nwse-resize; }
+    /**** Elements ****/
+    #undiscord summary { font-size: 16px; font-weight: 500; line-height: 20px; position: relative; overflow: hidden; margin-bottom: 2px; padding: 6px 10px; cursor: pointer; white-space: nowrap; text-overflow: ellipsis; color: var(--interactive-normal); border-radius: 4px; flex-shrink: 0; }
+    #undiscord fieldset { padding-left: 8px; }
+    #undiscord legend a { float: right; text-transform: initial; }
+    #undiscord progress { height: 8px; margin-top: 4px; flex-grow: 1; }
+    #undiscord .importJson { display: flex; flex-direction: row; }
+    #undiscord .importJson button { margin-left: 5px; width: fit-content; }
+    `);
 
-	var dragCss = (`
-[name^="grab-"] { position: absolute; --size: 6px; --corner-size: 16px; --offset: -1px; z-index: 9; }
-[name^="grab-"]:hover{ background: rgba(128,128,128,0.1); }
-[name="grab-t"] { top: 0px; left: var(--corner-size); right: var(--corner-size); height: var(--size); margin-top: var(--offset); cursor: ns-resize; }
-[name="grab-r"] { top: var(--corner-size); bottom: var(--corner-size); right: 0px; width: var(--size); margin-right: var(--offset); 
-  cursor: ew-resize; }
-[name="grab-b"] { bottom: 0px; left: var(--corner-size); right: var(--corner-size); height: var(--size); margin-bottom: var(--offset); cursor: ns-resize; }
-[name="grab-l"] { top: var(--corner-size); bottom: var(--corner-size); left: 0px; width: var(--size); margin-left: var(--offset); cursor: ew-resize; }
-[name="grab-tl"] { top: 0px; left: 0px; width: var(--corner-size); height: var(--corner-size); margin-top: var(--offset); margin-left: var(--offset); cursor: nwse-resize; }
-[name="grab-tr"] { top: 0px; right: 0px; width: var(--corner-size); height: var(--corner-size); margin-top: var(--offset); margin-right: var(--offset); cursor: nesw-resize; }
-[name="grab-br"] { bottom: 0px; right: 0px; width: var(--corner-size); height: var(--corner-size); margin-bottom: var(--offset); margin-right: var(--offset); cursor: nwse-resize; }
-[name="grab-bl"] { bottom: 0px; left: 0px; width: var(--corner-size); height: var(--corner-size); margin-bottom: var(--offset); margin-left: var(--offset); cursor: nesw-resize; }
-`);
+    var dragCss = (`
+   [name^="grab-"] { position: absolute; --size: 6px; --corner-size: 16px; --offset: -1px; z-index: 9; }
+   [name^="grab-"]:hover{ background: rgba(128,128,128,0.1); }
+   [name="grab-t"] { top: 0px; left: var(--corner-size); right: var(--corner-size); height: var(--size); margin-top: var(--offset); cursor: ns-resize; }
+   [name="grab-r"] { top: var(--corner-size); bottom: var(--corner-size); right: 0px; width: var(--size); margin-right: var(--offset);
+     cursor: ew-resize; }
+   [name="grab-b"] { bottom: 0px; left: var(--corner-size); right: var(--corner-size); height: var(--size); margin-bottom: var(--offset); cursor: ns-resize; }
+   [name="grab-l"] { top: var(--corner-size); bottom: var(--corner-size); left: 0px; width: var(--size); margin-left: var(--offset); cursor: ew-resize; }
+   [name="grab-tl"] { top: 0px; left: 0px; width: var(--corner-size); height: var(--corner-size); margin-top: var(--offset); margin-left: var(--offset); cursor: nwse-resize; }
+   [name="grab-tr"] { top: 0px; right: 0px; width: var(--corner-size); height: var(--corner-size); margin-top: var(--offset); margin-right: var(--offset); cursor: nesw-resize; }
+   [name="grab-br"] { bottom: 0px; right: 0px; width: var(--corner-size); height: var(--corner-size); margin-bottom: var(--offset); margin-right: var(--offset); cursor: nwse-resize; }
+   [name="grab-bl"] { bottom: 0px; left: 0px; width: var(--corner-size); height: var(--corner-size); margin-bottom: var(--offset); margin-left: var(--offset); cursor: nesw-resize; }
+   `);
 
-	var buttonHtml = (`
-<div id="undicord-btn" tabindex="0" role="button" aria-label="Delete Messages" title="Delete Messages with Undiscord">
-    <svg aria-hidden="false" width="24" height="24" viewBox="0 0 24 24">
-        <path fill="currentColor" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
-        <path fill="currentColor" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"></path>
-    </svg>
-    <progress></progress>
-</div>
-`);
+    var buttonHtml = (`
+   <div id="undicord-btn" tabindex="0" role="button" aria-label="Delete Messages" title="Delete Messages with Undiscord">
+       <svg aria-hidden="false" width="24" height="24" viewBox="0 0 24 24">
+           <path fill="currentColor" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
+           <path fill="currentColor" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"></path>
+       </svg>
+       <progress></progress>
+   </div>
+   `);
 
-	var undiscordTemplate = (`
-<div id="undiscord" class="browser container redact" style="display:none;">
-    <div class="header">
-        <svg class="icon" aria-hidden="false" width="24" height="24" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
-            <path fill="currentColor"
-                d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z">
-            </path>
-        </svg>
-        <h3>Undiscord</h3>
-        <div class="vert-divider"></div>
-        <span> Bulk delete messages</span>
-        <div class="spacer"></div>
-        <div id="hide" class="icon" aria-label="Close" role="button" tabindex="0">
-            <svg aria-hidden="false" width="24" height="24" viewBox="0 0 24 24">
+    var undiscordTemplate = (`
+    <div id="undiscord" class="browser container redact" style="display:none;">
+        <div class="header">
+            <svg class="icon" aria-hidden="false" width="24" height="24" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path>
                 <path fill="currentColor"
-                    d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z">
+                    d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z">
                 </path>
             </svg>
+            <h3>Undiscord</h3>
+            <div class="vert-divider"></div>
+            <span> Bulk delete messages</span>
+            <div class="spacer"></div>
+            <div id="hide" class="icon" aria-label="Close" role="button" tabindex="0">
+                <svg aria-hidden="false" width="24" height="24" viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                        d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z">
+                    </path>
+                </svg>
+            </div>
         </div>
-    </div>
-    <div class="window-body" style="display: flex; flex-direction: row;">
-        <div class="sidebar scroll">
-            <details open>
-                <summary>General</summary>
-                <fieldset>
-                    <legend>
-                        Author ID
-                        <a href="{{WIKI}}/authorId" title="Help" target="_blank" rel="noopener noreferrer">help</a>
-                    </legend>
-                    <div class="multiInput">
-                        <div class="input-wrapper">
-                            <input class="input" id="authorId" type="text" priv>
+        <div class="window-body" style="display: flex; flex-direction: row;">
+            <div class="sidebar scroll">
+                <details open>
+                    <summary>General</summary>
+                    <fieldset>
+                        <legend>
+                            Author ID
+                            <a href="{{WIKI}}/authorId" title="Help" target="_blank" rel="noopener noreferrer">help</a>
+                        </legend>
+                        <div class="multiInput">
+                            <div class="input-wrapper">
+                                <input class="input" id="authorId" type="text" priv>
+                            </div>
+                            <button id="getAuthor">me</button>
                         </div>
-                        <button id="getAuthor">me</button>
-                    </div>
-                </fieldset>
+                    </fieldset>
+                    <hr>
+                    <fieldset>
+                        <legend>
+                            Server ID
+                            <a href="{{WIKI}}/guildId" title="Help" target="_blank" rel="noopener noreferrer">help</a>
+                        </legend>
+                        <div class="multiInput">
+                            <div class="input-wrapper">
+                                <input class="input" id="guildId" type="text" priv>
+                            </div>
+                            <button id="getGuild">current</button>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>
+                            Channel ID
+                            <a href="{{WIKI}}/channelId" title="Help" target="_blank" rel="noopener noreferrer">help</a>
+                        </legend>
+                        <div class="multiInput mb1">
+                            <div class="input-wrapper">
+                                <input class="input" id="channelId" type="text" priv>
+                            </div>
+                            <button id="getChannel">current</button>
+                        </div>
+                        <div class="sectionDescription">
+                            <label class="row"><input id="includeNsfw" type="checkbox">This is a NSFW channel</label>
+                        </div>
+                    </fieldset>
+                </details>
+                <details>
+                    <summary>Wipe Archive</summary>
+                    <fieldset>
+                        <legend>
+                            Import index.json
+                            <a href="{{WIKI}}/importJson" title="Help" target="_blank" rel="noopener noreferrer">help</a>
+                        </legend>
+                        <div class="input-wrapper">
+                            <input type="file" id="importJsonInput" accept="application/json,.json" style="width:100%";>
+                        </div>
+                        <div class="sectionDescription">
+                            <br>
+                            After requesting your data from discord, you can import it here.<br>
+                            Select the "messages/index.json" file from the discord archive.
+                        </div>
+                    </fieldset>
+                </details>
                 <hr>
-                <fieldset>
-                    <legend>
-                        Server ID
-                        <a href="{{WIKI}}/guildId" title="Help" target="_blank" rel="noopener noreferrer">help</a>
-                    </legend>
-                    <div class="multiInput">
+                <details>
+                    <summary>Filter</summary>
+                    <fieldset>
+                        <legend>
+                            Search
+                            <a href="{{WIKI}}/filters" title="Help" target="_blank" rel="noopener noreferrer">help</a>
+                        </legend>
                         <div class="input-wrapper">
-                            <input class="input" id="guildId" type="text" priv>
+                            <input id="search" type="text" placeholder="Containing text" priv>
                         </div>
-                        <button id="getGuild">current</button>
-                    </div>
-                </fieldset>
-                <fieldset>
-                    <legend>
-                        Channel ID
-                        <a href="{{WIKI}}/channelId" title="Help" target="_blank" rel="noopener noreferrer">help</a>
-                    </legend>
-                    <div class="multiInput mb1">
+                        <div class="sectionDescription">
+                            Only delete messages that contain the text
+                        </div>
+                        <div class="sectionDescription">
+                            <label><input id="hasLink" type="checkbox">has: link</label>
+                        </div>
+                        <div class="sectionDescription">
+                            <label><input id="hasFile" type="checkbox">has: file</label>
+                        </div>
+                        <div class="sectionDescription">
+                            <label><input id="includePinned" type="checkbox">Include pinned</label>
+                        </div>
+                    </fieldset>
+                    <hr>
+                    <fieldset>
+                        <legend>
+                            Pattern
+                            <a href="{{WIKI}}/pattern" title="Help" target="_blank" rel="noopener noreferrer">help</a>
+                        </legend>
+                        <div class="sectionDescription">
+                            Delete messages that match the regular expression
+                        </div>
                         <div class="input-wrapper">
-                            <input class="input" id="channelId" type="text" priv>
+                            <span class="info">/</span>
+                            <input id="pattern" type="text" placeholder="regular expression" priv>
+                            <span class="info">/</span>
                         </div>
-                        <button id="getChannel">current</button>
-                    </div>
-                    <div class="sectionDescription">
-                        <label class="row"><input id="includeNsfw" type="checkbox">This is a NSFW channel</label>
-                    </div>
-                </fieldset>
-            </details>
-            <details>
-                <summary>Wipe Archive</summary>
-                <fieldset>
-                    <legend>
-                        Import index.json
-                        <a href="{{WIKI}}/importJson" title="Help" target="_blank" rel="noopener noreferrer">help</a>
-                    </legend>
-                    <div class="input-wrapper">
-                        <input type="file" id="importJsonInput" accept="application/json,.json" style="width:100%";>
-                    </div>
-                    <div class="sectionDescription">
+                    </fieldset>
+                </details>
+                <details>
+                    <summary>Messages interval</summary>
+                    <fieldset>
+                        <legend>
+                            Interval of messages
+                            <a href="{{WIKI}}/messageId" title="Help" target="_blank" rel="noopener noreferrer">help</a>
+                        </legend>
+                        <div class="multiInput mb1">
+                            <div class="input-wrapper">
+                                <input id="minId" type="text" placeholder="After a message" priv>
+                            </div>
+                            <button id="pickMessageAfter">Pick</button>
+                        </div>
+                        <div class="multiInput">
+                            <div class="input-wrapper">
+                                <input id="maxId" type="text" placeholder="Before a message" priv>
+                            </div>
+                            <button id="pickMessageBefore">Pick</button>
+                        </div>
+                        <div class="sectionDescription">
+                            Specify an interval to delete messages.
+                        </div>
+                    </fieldset>
+                </details>
+                <details>
+                    <summary>Date interval</summary>
+                    <fieldset>
+                        <legend>
+                            After date
+                            <a href="{{WIKI}}/dateRange" title="Help" target="_blank" rel="noopener noreferrer">help</a>
+                        </legend>
+                        <div class="input-wrapper mb1">
+                            <input id="minDate" type="datetime-local" title="Messages posted AFTER this date">
+                        </div>
+                        <legend>
+                            Before date
+                            <a href="{{WIKI}}/dateRange" title="Help" target="_blank" rel="noopener noreferrer">help</a>
+                        </legend>
+                        <div class="input-wrapper">
+                            <input id="maxDate" type="datetime-local" title="Messages posted BEFORE this date">
+                        </div>
+                        <div class="sectionDescription">
+                            Delete messages that were posted between the two dates.
+                        </div>
+                        <div class="sectionDescription">
+                            * Filtering by date doesn't work if you use the "Messages interval".
+                        </div>
+                    </fieldset>
+                </details>
+                <hr>
+                <details>
+                    <summary>Advanced settings</summary>
+                    <fieldset>
+                        <legend>
+                            Search delay
+                            <a href="{{WIKI}}/delay" title="Help" target="_blank" rel="noopener noreferrer">help</a>
+                        </legend>
+                        <div class="input-wrapper">
+                            <input id="searchDelay" type="range" value="30000" step="100" min="100" max="60000">
+                            <div id="searchDelayValue"></div>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>
+                            Delete delay
+                            <a href="{{WIKI}}/delay" title="Help" target="_blank" rel="noopener noreferrer">help</a>
+                        </legend>
+                        <div class="input-wrapper">
+                            <input id="deleteDelay" type="range" value="1000" step="50" min="50" max="10000">
+                            <div id="deleteDelayValue"></div>
+                        </div>
                         <br>
-                        After requesting your data from discord, you can import it here.<br>
-                        Select the "messages/index.json" file from the discord archive.
-                    </div>
-                </fieldset>
-            </details>
-            <hr>
-            <details>
-                <summary>Filter</summary>
-                <fieldset>
-                    <legend>
-                        Search
-                        <a href="{{WIKI}}/filters" title="Help" target="_blank" rel="noopener noreferrer">help</a>
-                    </legend>
-                    <div class="input-wrapper">
-                        <input id="search" type="text" placeholder="Containing text" priv>
-                    </div>
-                    <div class="sectionDescription">
-                        Only delete messages that contain the text
-                    </div>
-                    <div class="sectionDescription">
-                        <label><input id="hasLink" type="checkbox">has: link</label>
-                    </div>
-                    <div class="sectionDescription">
-                        <label><input id="hasFile" type="checkbox">has: file</label>
-                    </div>
-                    <div class="sectionDescription">
-                        <label><input id="includePinned" type="checkbox">Include pinned</label>
-                    </div>
-                </fieldset>
+                        <div class="sectionDescription">
+                            This will affect the speed in which the messages are deleted.
+                            Use the help link for more information.
+                        </div>
+                    </fieldset>
+                    <hr>
+                    <fieldset>
+                        <legend>
+                            Authorization Token
+                            <a href="{{WIKI}}/authToken" title="Help" target="_blank" rel="noopener noreferrer">help</a>
+                        </legend>
+                        <div class="multiInput">
+                            <div class="input-wrapper">
+                                <input class="input" id="token" type="text" autocomplete="dont" priv>
+                            </div>
+                            <button id="getToken">fill</button>
+                        </div>
+                    </fieldset>
+                </details>
                 <hr>
-                <fieldset>
-                    <legend>
-                        Pattern
-                        <a href="{{WIKI}}/pattern" title="Help" target="_blank" rel="noopener noreferrer">help</a>
-                    </legend>
-                    <div class="sectionDescription">
-                        Delete messages that match the regular expression
-                    </div>
-                    <div class="input-wrapper">
-                        <span class="info">/</span>
-                        <input id="pattern" type="text" placeholder="regular expression" priv>
-                        <span class="info">/</span>
-                    </div>
-                </fieldset>
-            </details>
-            <details>
-                <summary>Messages interval</summary>
-                <fieldset>
-                    <legend>
-                        Interval of messages
-                        <a href="{{WIKI}}/messageId" title="Help" target="_blank" rel="noopener noreferrer">help</a>
-                    </legend>
-                    <div class="multiInput mb1">
-                        <div class="input-wrapper">
-                            <input id="minId" type="text" placeholder="After a message" priv>
-                        </div>
-                        <button id="pickMessageAfter">Pick</button>
-                    </div>
-                    <div class="multiInput">
-                        <div class="input-wrapper">
-                            <input id="maxId" type="text" placeholder="Before a message" priv>
-                        </div>
-                        <button id="pickMessageBefore">Pick</button>
-                    </div>
-                    <div class="sectionDescription">
-                        Specify an interval to delete messages.
-                    </div>
-                </fieldset>
-            </details>
-            <details>
-                <summary>Date interval</summary>
-                <fieldset>
-                    <legend>
-                        After date
-                        <a href="{{WIKI}}/dateRange" title="Help" target="_blank" rel="noopener noreferrer">help</a>
-                    </legend>
-                    <div class="input-wrapper mb1">
-                        <input id="minDate" type="datetime-local" title="Messages posted AFTER this date">
-                    </div>
-                    <legend>
-                        Before date
-                        <a href="{{WIKI}}/dateRange" title="Help" target="_blank" rel="noopener noreferrer">help</a>
-                    </legend>
-                    <div class="input-wrapper">
-                        <input id="maxDate" type="datetime-local" title="Messages posted BEFORE this date">
-                    </div>
-                    <div class="sectionDescription">
-                        Delete messages that were posted between the two dates.
-                    </div>
-                    <div class="sectionDescription">
-                        * Filtering by date doesn't work if you use the "Messages interval".
-                    </div>
-                </fieldset>
-            </details>
-            <hr>
-            <details>
-                <summary>Advanced settings</summary>
-                <fieldset>
-                    <legend>
-                        Search delay
-                        <a href="{{WIKI}}/delay" title="Help" target="_blank" rel="noopener noreferrer">help</a>
-                    </legend>
-                    <div class="input-wrapper">
-                        <input id="searchDelay" type="range" value="30000" step="100" min="100" max="60000">
-                        <div id="searchDelayValue"></div>
-                    </div>
-                </fieldset>
-                <fieldset>
-                    <legend>
-                        Delete delay
-                        <a href="{{WIKI}}/delay" title="Help" target="_blank" rel="noopener noreferrer">help</a>
-                    </legend>
-                    <div class="input-wrapper">
-                        <input id="deleteDelay" type="range" value="1000" step="50" min="50" max="10000">
-                        <div id="deleteDelayValue"></div>
-                    </div>
-                    <br>
-                    <div class="sectionDescription">
-                        This will affect the speed in which the messages are deleted.
-                        Use the help link for more information.
-                    </div>
-                </fieldset>
-                <hr>
-                <fieldset>
-                    <legend>
-                        Authorization Token
-                        <a href="{{WIKI}}/authToken" title="Help" target="_blank" rel="noopener noreferrer">help</a>
-                    </legend>
-                    <div class="multiInput">
-                        <div class="input-wrapper">
-                            <input class="input" id="token" type="text" autocomplete="dont" priv>
-                        </div>
-                        <button id="getToken">fill</button>
-                    </div>
-                </fieldset>
-            </details>
-            <hr>
-            <div></div>
-            <div class="info">
-                Undiscord {{VERSION}}
-                <br> victornpb
+                <div></div>
+                <div class="info">
+                    Undiscord {{VERSION}}
+                    <br> victornpb
+                </div>
             </div>
-        </div>
-        <div class="main col">
-            <div class="tbar col">
-                <div class="row">
-                    <button id="toggleSidebar" class="sizeMedium icon">☰</button>
-                    <button id="start" class="sizeMedium danger" style="width: 150px;" title="Start the deletion process">▶︎ Delete</button>
-                    <button id="stop" class="sizeMedium" title="Stop the deletion process" disabled>🛑 Stop</button>
-                    <button id="clear" class="sizeMedium">Clear log</button>
-                    <label class="row" title="Hide sensitive information on your screen for taking screenshots">
-                        <input id="redact" type="checkbox" checked> Streamer mode
+            <div class="main col">
+                <div class="tbar col">
+                    <div class="row">
+                        <button id="toggleSidebar" class="sizeMedium icon">☰</button>
+                        <button id="start" class="sizeMedium danger" style="width: 150px;" title="Start the deletion process">▶︎ Delete</button>
+                        <button id="stop" class="sizeMedium" title="Stop the deletion process" disabled>🛑 Stop</button>
+                        <button id="clear" class="sizeMedium">Clear log</button>
+                        <label class="row" title="Hide sensitive information on your screen for taking screenshots">
+                            <input id="redact" type="checkbox" checked> Streamer mode
+                        </label>
+                    </div>
+                    <div class="row">
+                        <progress id="progressBar" style="display:none;"></progress>
+                    </div>
+                </div>
+                <pre id="logArea" class="logarea scroll">
+                    <div class="" style="background: var(--background-mentioned); padding: .5em;">Notice: Undiscord may be working slower than usual and<wbr>require multiple attempts due to a recent Discord update.<br>We're working on a fix, and we thank you for your patience.</div>
+                    <center>
+                        <div>Star <a href="{{HOME}}" target="_blank" rel="noopener noreferrer">this project</a> on GitHub!</div>
+                        <div><a href="{{HOME}}/discussions" target="_blank" rel="noopener noreferrer">Issues or help</a></div>
+                    </center>
+                </pre>
+                <div class="tbar footer row">
+                    <div id="progressPercent"></div>
+                    <span class="spacer"></span>
+                    <label>
+                        <input id="autoScroll" type="checkbox" checked> Auto scroll
                     </label>
+                    <div class="resize-handle"></div>
                 </div>
-                <div class="row">
-                    <progress id="progressBar" style="display:none;"></progress>
-                </div>
-            </div>
-            <pre id="logArea" class="logarea scroll">
-                <div class="" style="background: var(--background-mentioned); padding: .5em;">Notice: Undiscord may be working slower than usual and<wbr>require multiple attempts due to a recent Discord update.<br>We're working on a fix, and we thank you for your patience.</div>
-                <center>
-                    <div>Star <a href="{{HOME}}" target="_blank" rel="noopener noreferrer">this project</a> on GitHub!</div>
-                    <div><a href="{{HOME}}/discussions" target="_blank" rel="noopener noreferrer">Issues or help</a></div>
-                </center>
-            </pre>
-            <div class="tbar footer row">
-                <div id="progressPercent"></div>
-                <span class="spacer"></span>
-                <label>
-                    <input id="autoScroll" type="checkbox" checked> Auto scroll
-                </label>
-                <div class="resize-handle"></div>
             </div>
         </div>
     </div>
-</div>
 
-`);
+    `);
 
 	const log = {
 	  debug() { return logFn ? logFn('debug', arguments) : console.debug.apply(console, arguments); },
