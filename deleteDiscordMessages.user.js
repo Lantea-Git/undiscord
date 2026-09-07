@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Undiscord
 // @description     Delete all messages in a Discord channel or DM (Bulk deletion)
-// @version         5.2.7.2
+// @version         5.2.7.3
 // @author          victornpb
 // @homepageURL     https://github.com/victornpb/undiscord
 // @supportURL      https://github.com/victornpb/undiscord/discussions
@@ -14,6 +14,8 @@
 // @contributionURL https://www.buymeacoffee.com/vitim
 // @grant           none
 // @attribution     Original project (https://github.com/victornpb/undiscord)
+// @downloadURL     https://update.greasyfork.org/scripts/566534/Undiscord.user.js
+// @updateURL       https://update.greasyfork.org/scripts/566534/Undiscord.user.js
 // ==/UserScript==
 
 (function () {
